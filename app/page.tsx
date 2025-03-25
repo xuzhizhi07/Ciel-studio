@@ -129,15 +129,17 @@ export default function Home() {
   const [headings, setHeadings] = useState([]);
   const [activeHeading, setActiveHeading] = useState('');
   const [activeMenu, setActiveMenu] = useState(menuData[0].title);
+  const [breadcrumb, setBreadcrumb] = useState([menuData[0].title]);
 
   useEffect(() => {
     const extractedHeadings = extractHeadings(selectedContent);
     setHeadings(extractedHeadings);
   }, [selectedContent]);
 
-  const handleMenuClick = (content, title) => {
+  const handleMenuClick = (content, title, parentTitle = null) => {
     setSelectedContent(content);
     setActiveMenu(title);
+    setBreadcrumb(parentTitle ? [parentTitle, title] : [title]);
   };
 
   // 自定义渲染标题，添加 id 以支持导航定位
@@ -185,7 +187,7 @@ export default function Home() {
                           }`}
                           onClick={(e) => {
                             e.preventDefault();
-                            handleMenuClick(child.content, child.title);
+                            handleMenuClick(child.content, child.title, item.title);
                           }}
                         >
                           {child.title}
@@ -203,6 +205,34 @@ export default function Home() {
       {/* Content Display */}
       <main className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto p-8">
+          {/* Breadcrumb Navigation */}
+          <nav className="mb-6">
+            <ol className="flex items-center space-x-2 text-sm text-gray-600">
+              {breadcrumb.map((item, index) => (
+                <li key={index} className="flex items-center">
+                  {index > 0 && <span className="mx-2">/</span>}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (index === 0) {
+                        // Find the parent document
+                        const parentDoc = menuData.find(doc => doc.title === item);
+                        if (parentDoc) {
+                          handleMenuClick(parentDoc.content, parentDoc.title);
+                        }
+                      }
+                    }}
+                    className={`hover:text-black transition-colors duration-150 ${
+                      index === breadcrumb.length - 1 ? 'text-black font-medium' : ''
+                    }`}
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
           <div className="prose prose-lg prose-black max-w-none">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
