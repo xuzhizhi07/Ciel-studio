@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Book1 } from 'iconsax-react';
 
 // 解析标题的函数
 const extractHeadings = (content: string) => {
@@ -126,102 +127,120 @@ def hello_world():
 export default function Home() {
   const [selectedContent, setSelectedContent] = useState(menuData[0].content);
   const [headings, setHeadings] = useState([]);
+  const [activeHeading, setActiveHeading] = useState('');
+  const [activeMenu, setActiveMenu] = useState(menuData[0].title);
 
   useEffect(() => {
     const extractedHeadings = extractHeadings(selectedContent);
     setHeadings(extractedHeadings);
   }, [selectedContent]);
 
-  const handleMenuClick = (content) => {
+  const handleMenuClick = (content, title) => {
     setSelectedContent(content);
+    setActiveMenu(title);
   };
 
   // 自定义渲染标题，添加 id 以支持导航定位
   const components = {
-    h1: ({children}) => <h1 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h1>,
-    h2: ({children}) => <h2 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h2>,
-    h3: ({children}) => <h3 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h3>,
-    h4: ({children}) => <h4 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h4>,
-    h5: ({children}) => <h5 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h5>,
-    h6: ({children}) => <h6 id={children.toLowerCase().replace(/\s+/g, '-')}>{children}</h6>,
+    h1: ({children}) => <h1 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-3xl font-bold mb-6">{children}</h1>,
+    h2: ({children}) => <h2 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-2xl font-semibold mb-4 mt-8">{children}</h2>,
+    h3: ({children}) => <h3 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-xl font-medium mb-3 mt-6">{children}</h3>,
+    h4: ({children}) => <h4 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-lg font-medium mb-2 mt-4">{children}</h4>,
+    h5: ({children}) => <h5 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-base font-medium mb-2 mt-4">{children}</h5>,
+    h6: ({children}) => <h6 id={children.toLowerCase().replace(/\s+/g, '-')} className="text-sm font-medium mb-2 mt-4">{children}</h6>,
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
       {/* Left Menu */}
-      <aside className="w-1/4 p-4 border-r bg-gray-50">
-        <h2 className="text-xl font-bold mb-4">目录</h2>
-        <ul>
-          {menuData.map((item, index) => (
-            <li key={index} className="mb-2">
-              <a 
-                href="#" 
-                className="text-blue-600 hover:text-blue-800 hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleMenuClick(item.content);
-                }}
-              >
-                {item.title}
-              </a>
-              {item.children && (
-                <ul className="ml-4 mt-2">
-                  {item.children.map((child, childIndex) => (
-                    <li key={childIndex} className="mb-2">
-                      <a 
-                        href="#" 
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleMenuClick(child.content);
-                        }}
-                      >
-                        {child.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
+      <aside className="w-64 border-r border-gray-200 bg-white">
+        <div className="p-6">
+          <h2 className="flex items-center text-lg font-semibold text-gray-900 mb-6">
+            <Book1 size={24} className="mr-2" variant="Bold"/>
+            目录
+          </h2>
+          <ul className="space-y-2">
+            {menuData.map((item, index) => (
+              <li key={index}>
+                <a 
+                  href="#" 
+                  className={`flex items-center text-gray-700 hover:text-black transition-colors duration-150 p-2 rounded-lg ${
+                    activeMenu === item.title ? 'bg-gray-200' : 'hover:bg-gray-100'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick(item.content, item.title);
+                  }}
+                >
+                  {item.title}
+                </a>
+                {item.children && (
+                  <ul className="ml-6 mt-2 space-y-2 border-l border-gray-200 pl-4">
+                    {item.children.map((child, childIndex) => (
+                      <li key={childIndex}>
+                        <a 
+                          href="#" 
+                          className={`flex items-center text-gray-600 hover:text-black transition-colors duration-150 p-2 rounded-lg ${
+                            activeMenu === child.title ? 'bg-gray-200' : 'hover:bg-gray-100'
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleMenuClick(child.content, child.title);
+                          }}
+                        >
+                          {child.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </aside>
 
       {/* Content Display */}
-      <main className="w-1/2 p-8 overflow-auto">
-        <div className="prose max-w-none">
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={components}
-          >
-            {selectedContent}
-          </ReactMarkdown>
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-4xl mx-auto p-8">
+          <div className="prose prose-lg prose-black max-w-none">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={components}
+            >
+              {selectedContent}
+            </ReactMarkdown>
+          </div>
         </div>
       </main>
 
       {/* Navigation */}
-      <nav className="w-1/4 p-4 border-l bg-gray-50">
-        <h2 className="text-xl font-bold mb-4">导航</h2>
-        <ul>
-          {headings.map((heading, index) => (
-            <li 
-              key={index} 
-              className="mb-2"
-              style={{ paddingLeft: `${(heading.level - 1) * 1}rem` }}
-            >
-              <a 
-                href={`#${heading.id}`}
-                className="text-blue-600 hover:text-blue-800 hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
-                }}
+      <nav className="w-64 border-l border-gray-200 bg-white">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">导航</h2>
+          <ul className="space-y-2">
+            {headings.map((heading, index) => (
+              <li 
+                key={index} 
+                style={{ paddingLeft: `${(heading.level - 1) * 1}rem` }}
               >
-                {heading.text}
-              </a>
-            </li>
-          ))}
-        </ul>
+                <a 
+                  href={`#${heading.id}`}
+                  className={`text-sm text-gray-600 hover:text-black transition-colors duration-150 block ${
+                    activeHeading === heading.id ? 'text-black font-medium' : ''
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveHeading(heading.id);
+                    document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
     </div>
   );
